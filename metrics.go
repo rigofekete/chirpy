@@ -7,9 +7,17 @@ import(
 
 
 func (cfg *apiConfig) handlerMetrics(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "text/plain; charset=utg-8")
+	w.Header().Set("Content-Type", "text/html; charset=utg-8")
 	w.WriteHeader(http.StatusOK)
-	s := fmt.Sprintf("Hits: %d", cfg.fileserverHits.Load())
+
+	s := fmt.Sprintf(`
+	<html>
+	  <body>
+	    <h1>Welcome, Chirpy Admin</h1>
+	    <p>Chirpy has been visited %d times!</p>
+	  </body>
+	</html>`, cfg.fileserverHits.Load())
+
 	w.Write([]byte(s))
 }
 
