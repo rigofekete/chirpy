@@ -1,6 +1,6 @@
 # chirpy API 
 
-## Small Go HTTP server for simple endpoints and JSON handling.
+Small Go HTTP server for simple endpoints and JSON handling.
 
 - GET  api/healthz          – readiness probe
 - GET  admin/metrics        – basic metrics
