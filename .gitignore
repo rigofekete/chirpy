@@ -2,4 +2,4 @@ out
 chirpy
 Session.vim
 connection_str.txt
-./env
+.env
