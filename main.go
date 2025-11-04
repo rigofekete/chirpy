@@ -5,25 +5,17 @@ import (
 	"net/http"
 	"sync/atomic"
 	"database/sql"
-	"time"
 	"os"
 
 	_ "github.com/lib/pq"
 	"github.com/joho/godotenv"
 	"github.com/rigofekete/chirpy/internal/database"
-	"github.com/google/uuid"
 )
 
 type apiConfig struct {
 	fileserverHits atomic.Int32
 	db *database.Queries
-}
-
-type users struct {
-	ID        uuid.UUID 	`json:"id"`
-	CreatedAt time.Time	`json:"created_at"`
-	UpdatedAt time.Time	`json:"updated_at"`
-	Email 	  string	`json:"email"`
+	platform string
 }
 
 
@@ -44,9 +36,15 @@ func main() {
 	}
 	dbQueries := database.New(dbConn)
 
+	p := os.Getenv("PLATFORM")
+	if p == "" {
+		log.Fatal("PLATFORM must be set")
+	}
+
 	apiCfg := apiConfig{
 		fileserverHits: atomic.Int32{},
 		db:		dbQueries,
+		platform: 	p,
 	}
 
 	mux := http.NewServeMux()
@@ -61,7 +59,7 @@ func main() {
 	mux.HandleFunc("GET /admin/metrics", apiCfg.handlerMetrics)
 	mux.HandleFunc("POST /admin/reset", apiCfg.handlerReset)
 	mux.HandleFunc("POST /api/validate_chirp", handlerValidateChirp)
-	mux.HandleFunc("POST /api/users", apiCfg.handlerUsers)
+	mux.HandleFunc("POST /api/users", apiCfg.handlerUsersCreate)
 	
 	
 	log.Printf("Serving files from %s on port: %s\n", filepathRoot, port)
