@@ -1,11 +1,12 @@
 # chirpy API 
 
-Small Go HTTP server for simple endpoints and JSON handling.
+Simple Go HTTP server exposing RESTful JSON endpoints for a Twitter‑style service.
 
 - GET  api/healthz          – readiness probe
 - GET  admin/metrics        – basic metrics
 - POST admin/reset          – metrics reset endpoint
-- POST api/validate_chirp   – validates short text messages (<= 140 chars) and replaces profane words
+- POST api/users            – add users to the database
+- POST api/chirps           – validate and add chirps ("tweets") to the database
 
 - Serves static index.html and assets
 - Uses JSON decoding/encoding 
