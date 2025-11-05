@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"strings"
 	"time"
+	"errors"
 
 
 	"github.com/google/uuid"
@@ -33,7 +34,24 @@ func getCleanedBody(body string, profane_words map[string]struct{}) string {
 	return strings.Join(wordsList, " ")
 }
 
-func (cfg *apiConfig) handlerChirps(w http.ResponseWriter, r *http.Request) {
+func validateChirp(body string) (string, error) {
+	const maxChirpLength = 140
+	if len(body) > maxChirpLength {
+		return "", errors.New("Chirp is too long") 
+	}
+
+
+	profane_words := map[string]struct{}{
+		"kerfuffle": {}, 
+		"sharbert": {}, 
+		"fornax": {},
+	}
+
+	cleaned := getCleanedBody(body, profane_words)
+	return cleaned, nil
+}
+
+func (cfg *apiConfig) handlerChirpsCreate(w http.ResponseWriter, r *http.Request) {
 	type parameters struct {
 		Body string `json:"body"`
 		UserID uuid.UUID `json:"user_id"`
@@ -51,20 +69,11 @@ func (cfg *apiConfig) handlerChirps(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	const maxChirpLength = 140
-	if len(params.Body) > maxChirpLength {
-		respondWithError(w, http.StatusBadRequest, "Chirp is too long", nil)
-		return 
+	cleaned, err := validateChirp(params.Body)
+	if err != nil {
+		respondWithError(w, http.StatusBadRequest, err.Error(), err)
+		return
 	}
-
-
-	profane_words := map[string]struct{}{
-		"kerfuffle": {}, 
-		"sharbert": {}, 
-		"fornax": {},
-	}
-
-	cleaned := getCleanedBody(params.Body, profane_words)
 	
 	chirpParams := database.CreateChirpParams{
 		Body: cleaned,
