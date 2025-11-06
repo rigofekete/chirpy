@@ -12,7 +12,7 @@ func (cfg *apiConfig) handlerChirpsGet(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var chirpsJSON = []Chirp{}
+	chirpsJSON := []Chirp{}
 
 	for _, dbChirp := range dbChirps {
 		chirpsJSON = append(chirpsJSON, Chirp{
