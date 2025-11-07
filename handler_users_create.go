@@ -15,6 +15,7 @@ type User struct {
 	CreatedAt time.Time	`json:"created_at"`
 	UpdatedAt time.Time	`json:"updated_at"`
 	Email 	  string	`json:"email"`
+	// In Go's JSON tags, "-" is a special directive meaning "ignore this field"
 	HashedPassword string	`json:"-"`
 }
 
