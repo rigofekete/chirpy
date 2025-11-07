@@ -6,6 +6,8 @@ import(
 	"time"	
 
 	"github.com/google/uuid"
+	"github.com/rigofekete/chirpy/internal/auth"
+	"github.com/rigofekete/chirpy/internal/database"
 )
 
 type User struct {
@@ -13,12 +15,14 @@ type User struct {
 	CreatedAt time.Time	`json:"created_at"`
 	UpdatedAt time.Time	`json:"updated_at"`
 	Email 	  string	`json:"email"`
+	HashedPassword string	`json:"-"`
 }
 
 
 func (cfg *apiConfig) handlerUsersCreate(w http.ResponseWriter, r *http.Request) {
 	type parameters struct {
-		Email string `json:"email"`
+		Password string		`json:"password"`
+		Email string 		`json:"email"`
 	}
 
 	type response struct {
@@ -29,14 +33,26 @@ func (cfg *apiConfig) handlerUsersCreate(w http.ResponseWriter, r *http.Request)
 	params := parameters{}
 	err := decoder.Decode(&params)
 	if err != nil {
-		respondWithError(w, http.StatusInternalServerError, "Couldn't decode paramters", err)
+		respondWithError(w, http.StatusInternalServerError, "Couldn't decode parameters", err)
 		return 
 	}
 
-	user, err := cfg.db.CreateUser(r.Context(), params.Email) 	
+	hash, err := auth.HashPassword(params.Password)
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, "Couldn't hash password", err)
+		return
+	}
+
+	userParams := database.CreateUserParams{
+		Email: params.Email,
+		HashedPassword: hash,
+	}
+
+	user, err := cfg.db.CreateUser(r.Context(), userParams) 	
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, "Couldn't create user", err) 
 	}
+
 
 	userResp := response{
 		User: User{
