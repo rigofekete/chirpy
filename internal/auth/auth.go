@@ -4,6 +4,8 @@ import(
 	"time"
 	"fmt"
 	"errors"
+	"net/http"
+	"strings"
 
 	"github.com/alexedwards/argon2id"
 	"github.com/google/uuid"
@@ -83,5 +85,14 @@ func ValidateJWT(tokenString, tokenSecret string) (uuid.UUID, error) {
 	}
 
 	return id, nil 
+}
+
+func GetBearerToken(headers http.Header) (string, error) {
+	bearer, ok := strings.CutPrefix(headers.Get("Authorization"), "Bearer ")
+	if !ok {
+		return "", errors.New("no 'Bearer ' prefix in authorization header")
+	}
+
+	return bearer, nil 
 }
 
