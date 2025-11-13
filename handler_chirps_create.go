@@ -10,15 +10,16 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/rigofekete/chirpy/internal/database"
+	"github.com/rigofekete/chirpy/internal/auth"
 )
 
 
 type Chirp struct {
-	ID uuid.UUID		`json:"id"`
-	CreatedAt time.Time	`json:"created_at"`
-	UpdatedAt time.Time	`json:"updated_at"`
-	Body string 		`json:"body"`
-	UserID uuid.UUID	`json:"user_id"`
+	ID 		uuid.UUID	`json:"id"`
+	CreatedAt 	time.Time	`json:"created_at"`
+	UpdatedAt 	time.Time	`json:"updated_at"`
+	UserID 		uuid.UUID	`json:"user_id"`
+	Body 		string 		`json:"body"`
 }
 
 func getCleanedBody(body string, profane_words map[string]struct{}) string {
@@ -54,16 +55,23 @@ func validateChirp(body string) (string, error) {
 func (cfg *apiConfig) handlerChirpsCreate(w http.ResponseWriter, r *http.Request) {
 	type parameters struct {
 		Body string `json:"body"`
-		UserID uuid.UUID `json:"user_id"`
 	}
 
-	type response struct {
-		Chirp
+	tokenString, err := auth.GetBearerToken(r.Header)
+	if err != nil {
+		respondWithError(w, http.StatusUnauthorized, "Error getting token from bearer", err)
+		return
+	}
+
+	userID, err := auth.ValidateJWT(tokenString, cfg.jwtSecret)
+	if err != nil {
+		respondWithError(w, http.StatusUnauthorized, "Invalid JWT token", err)
+		return
 	}
 
 	decoder := json.NewDecoder(r.Body)
 	params := parameters{}
-	err := decoder.Decode(&params)
+	err = decoder.Decode(&params)
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, "Couldn't decode parameters", err)
 		return
@@ -77,7 +85,7 @@ func (cfg *apiConfig) handlerChirpsCreate(w http.ResponseWriter, r *http.Request
 	
 	chirpParams := database.CreateChirpParams{
 		Body: cleaned,
-		UserID: params.UserID,
+		UserID: userID,
 	}
 
 	chirp, err := cfg.db.CreateChirp(r.Context(), chirpParams)
@@ -87,15 +95,14 @@ func (cfg *apiConfig) handlerChirpsCreate(w http.ResponseWriter, r *http.Request
 	}
 
 
-	chirpResp := response{
-		Chirp: Chirp{
-			ID: chirp.ID,
-			CreatedAt: chirp.CreatedAt,
-			UpdatedAt: chirp.UpdatedAt,
-			Body:	   chirp.Body,
-			UserID:	   chirp.UserID,
-		},
+	chirpResp := Chirp{
+		ID: chirp.ID,
+		CreatedAt: chirp.CreatedAt,
+		UpdatedAt: chirp.UpdatedAt,
+		Body:	   chirp.Body,
+		UserID:	   chirp.UserID,
 	}
+	
 
 	respondWithJSON(w, http.StatusCreated, chirpResp)
 	return 

@@ -3,6 +3,7 @@ package main
 import(
 	"net/http"
 	"encoding/json"
+	"time"
 
 	"github.com/rigofekete/chirpy/internal/auth"
 )
@@ -10,12 +11,16 @@ import(
 
 func (cfg *apiConfig) handlerUserLogin(w http.ResponseWriter, r *http.Request) {
 	type parameters struct {
-		Password string		`json:"password"`
-		Email string 		`json:"email"`
+		Password 		string		`json:"password"`
+		Email 			string 		`json:"email"`
+		ExpiresInSeconds 	int		`json:"expires_in_seconds"`
 	}
+
 
 	type response struct {
 		User
+		Token		string	`json:"token"`
+		RefreshToken	string 	`json:"refresh_token"`
 	}
 
 	decoder := json.NewDecoder(r.Body)
@@ -32,18 +37,24 @@ func (cfg *apiConfig) handlerUserLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-
 	match, err := auth.CheckPasswordHash(params.Password, user.HashedPassword)
+	if err != nil || !match {
+		respondWithError(w, http.StatusUnauthorized, "Incorrect email or password", err)
+		return
+	}
+
+	expirationTime := time.Hour 
+
+	if params.ExpiresInSeconds > 0 && params.ExpiresInSeconds < 3600 {
+		expirationTime = time.Duration(params.ExpiresInSeconds) * time.Second
+	}
+
+
+	accessToken, err := auth.MakeJWT(user.ID, cfg.jwtSecret, expirationTime) 
 	if err != nil {
-		respondWithError(w, http.StatusInternalServerError, "Error checking hash password match", err)
+		respondWithError(w, http.StatusInternalServerError, "Error creating JWT", err)
 		return
 	}
-
-	if match != true {
-		respondWithError(w, http.StatusUnauthorized, "Incorrect password", nil)
-		return
-	}
-
 
 	userResp := response{
 		User: User{
@@ -52,6 +63,7 @@ func (cfg *apiConfig) handlerUserLogin(w http.ResponseWriter, r *http.Request) {
 			UpdatedAt: 	user.UpdatedAt,
 			Email:		user.Email,
 		},
+		Token:	accessToken,
 	}
 
 	respondWithJSON(w, http.StatusOK, userResp)
