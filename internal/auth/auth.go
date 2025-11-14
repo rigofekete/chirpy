@@ -28,7 +28,6 @@ func HashPassword(password string) (string, error) {
 	return hash, nil
 }
 
-
 func CheckPasswordHash(password, hash string) (bool, error) {
 	match, err := argon2id.ComparePasswordAndHash(password, hash)
 	if err != nil {
@@ -88,11 +87,16 @@ func ValidateJWT(tokenString, tokenSecret string) (uuid.UUID, error) {
 }
 
 func GetBearerToken(headers http.Header) (string, error) {
-	bearer, ok := strings.CutPrefix(headers.Get("Authorization"), "Bearer ")
-	if !ok {
-		return "", errors.New("no 'Bearer ' prefix in authorization header")
+	authHeader := headers.Get("Authorization")
+	if authHeader == "" {
+		return "", errors.New("No auth header included in request")
+	}
+	
+	splitAuth := strings.Split(authHeader, " ")
+	if len(splitAuth) < 2 || splitAuth[0] != "Bearer" {
+		return "", errors.New("malformed authorization header")
 	}
 
-	return bearer, nil 
+	return splitAuth[1], nil
 }
 

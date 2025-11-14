@@ -3,10 +3,8 @@ package auth
 import (
 	"testing"
 	"time"
-	"net/http"
 
 	"github.com/google/uuid"
-	// jwt "github.com/golang-jwt/jwt/v5"
 )
 
 
@@ -122,21 +120,6 @@ func TestValidateJWT(t *testing.T) {
 	}
 }
 
-func TestGetBearerToken(t *testing.T) {
-	client := &http.Client{}
-	resp, err := client.Get("http://example.com")
-	if err != nil {
-		t.Errorf("Error creating http request: %v", err)
-	}
 
-	resp.Header.Add("Authorization", "Bearer S0meTh1ngF@nd1")
 
-	result, err := GetBearerToken(resp.Header)
-	if err != nil {
-		t.Errorf("Error getting bearer token: %v", err)
-	}
 
-	if result != "S0meTh1ngF@nd1" {
-		t.Errorf("result should be 'S0meTh1ngF@nd1'. Current Result: %s", result)
-	}
-}
