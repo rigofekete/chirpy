@@ -6,6 +6,8 @@ import(
 	"errors"
 	"net/http"
 	"strings"
+	"crypto/rand"
+	"encoding/hex"
 
 	"github.com/alexedwards/argon2id"
 	"github.com/google/uuid"
@@ -99,4 +101,13 @@ func GetBearerToken(headers http.Header) (string, error) {
 
 	return splitAuth[1], nil
 }
+
+
+func MakeRefreshToken() (string, error) {
+	key := make([]byte, 32)
+	rand.Read(key)
+	encodedString := hex.EncodeToString(key)
+	return encodedString, nil
+}
+
 
