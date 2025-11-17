@@ -39,6 +39,10 @@ func (cfg *apiConfig) handlerRefreshToken(w http.ResponseWriter, r *http.Request
 
 func (cfg *apiConfig) handlerRevokeToken(w http.ResponseWriter, r *http.Request) {
 	refreshToken, err := auth.GetBearerToken(r.Header) 
+	if err != nil {
+		respondWithError(w, http.StatusBadRequest, "Couldn't find token", err) 
+		return
+	}
 
 	_, err = cfg.db.RevokeRefreshToken(r.Context(), refreshToken)
 	if err != nil {
