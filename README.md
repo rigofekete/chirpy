@@ -17,24 +17,24 @@ Simple experimental Go HTTP server exposing RESTful JSON endpoints for a Twitter
 - Uses JSON decoding/encoding 
 - PostgreSQL database integration 
 
-## Avaliable endpoints
+## Available endpoints
 
-- GET  api/healthz          – readiness probe
-- GET  admin/metrics        – basic metrics
-- POST admin/reset          – Database and metrics reset endpoint
+- `GET  api/healthz`          – readiness probe
+- `GET  admin/metrics`        – basic metrics
+- `POST admin/reset`          – Database and metrics reset endpoint
 
-- POST api/users            – add users to the database
-- POST api/login            - authenticate and login user 
-- PUT api/users             – user update 
+- `POST api/users`            – add users to the database
+- `POST api/login`            - authenticate and login user 
+- `PUT api/users`             – user update 
 
-- POST api/chirps           – validate and add chirps ("tweets") to the database
-- GET api/chirps            – get all chirps from the database with query parameters for Author ID and ASC/DESC order  
-- GET api/chirps/{chirpID}  - get chirp by ID 
+- `POST api/chirps`           – validate and add chirps ("tweets") to the database
+- `GET api/chirps`            – get all chirps from the database with query parameters for Author ID and ASC/DESC order  
+- `GET api/chirps/{chirpID}`  - get chirp by ID 
 
-- POST api/refresh          - refresh JWT token 
-- POST api/revoke           - revoke JWT token 
+- `POST api/refresh`          - refresh JWT token 
+- `POST api/revoke`           - revoke JWT token 
 
-- POST api/polka/webhooks   - webhook endpoint for third-party payment service to confirm subscription activation
+- `POST api/polka/webhooks`   - webhook endpoint for third-party payment service to confirm subscription activation
 
 ## Dependencies 
 
