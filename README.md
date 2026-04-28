@@ -1,6 +1,6 @@
 # chirpy 
 
-Simple experimental Go HTTP server exposing RESTful JSON endpoints for a Twitter‑style service.
+Simple experimental Go HTTP server exposing RESTful endpoints for a Twitter‑style service.
 
 ## Features
 
