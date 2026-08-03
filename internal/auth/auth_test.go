@@ -1,12 +1,12 @@
-package auth 
+package auth
 
 import (
+	"net/http"
 	"testing"
 	"time"
 
 	"github.com/google/uuid"
 )
-
 
 func TestCheckPasswordHash(t *testing.T) {
 	password1 := "correctPassword123!"
@@ -71,7 +71,6 @@ func TestCheckPasswordHash(t *testing.T) {
 	}
 }
 
-
 func TestValidateJWT(t *testing.T) {
 	userID := uuid.New()
 	validToken, _ := MakeJWT(userID, "secret", time.Hour)
@@ -120,7 +119,6 @@ func TestValidateJWT(t *testing.T) {
 	}
 }
 
-
 func TestGetBearerToken(t *testing.T) {
 	tests := []struct {
 		name      string
@@ -165,4 +163,3 @@ func TestGetBearerToken(t *testing.T) {
 		})
 	}
 }
-
